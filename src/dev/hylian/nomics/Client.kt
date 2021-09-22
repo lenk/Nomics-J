@@ -2,6 +2,7 @@ package dev.hylian.nomics
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.hylian.nomics.data.*
+import org.apache.http.client.HttpResponseException
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpRequestBase
 import org.apache.http.client.utils.URIBuilder
@@ -28,6 +29,8 @@ class Client(private val key: String) {
      * Exchange rates for every point from [start] to [end] time range.
      * This endpoint can be used with other history endpoints to convert values into a desired quote [currency].
      */
+
+    @Throws(HttpStatusException::class, IOException::class)
     fun getRatesHistory(currency: String = "BTC", start: Date = Date(), end: Date ? = null): RatesHistory {
         synchronized(http) {
             val request = HttpGet("$rates/history")
@@ -39,7 +42,14 @@ class Client(private val key: String) {
                 .addParameter("key", key).build()
 
 
-            return mapper.readValue(http.execute(request).entity.content, RatesHistory::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, RatesHistory::class.java)
         }
     }
 
@@ -48,6 +58,8 @@ class Client(private val key: String) {
      * This contains Fiat currencies as well as a BTC and ETH quote prices.
      * This endpoint helps normalize data across markets as well as to provide localization for users.
      */
+
+    @Throws(HttpStatusException::class, IOException::class)
     fun getRates(): Rates? {
         synchronized(http) {
             val request = HttpGet(rates)
@@ -56,7 +68,14 @@ class Client(private val key: String) {
                 .addParameter("key", key).build()
 
 
-            return mapper.readValue(http.execute(request).entity.content, Rates::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Rates::class.java)
         }
     }
 
@@ -65,6 +84,8 @@ class Client(private val key: String) {
      * The markets endpoint returns information on the [exchange]s and markets that Nomics supports,
      * in addition to the Nomics currency identifiers for the [base] and [quote] currency.
      */
+
+    @Throws(HttpStatusException::class, IOException::class)
     fun getMarkets(exchange: String = "", base: Array<String> = emptyArray(), quote: Array<String> = emptyArray()): Markets {
         synchronized(http) {
             val request = HttpGet(markets)
@@ -76,10 +97,21 @@ class Client(private val key: String) {
 
                 .addParameter("key", key).build()
 
-            return mapper.readValue((http.execute(request).entity.content), Markets::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Markets::class.java)
         }
     }
 
+    /**
+     * Volume History is the total volume for all crypto-assets in [toCurrency] at intervals between the requested [start] and [end] time period.
+     * For each entry, the volume field represents the sum of the spot_volume and derivative_volume fields.
+     */
     @Throws(HttpStatusException::class, IOException::class)
     fun getVolume(start: Date, end: Date ? = null, toCurrency: String = "USD"): Volume {
         synchronized(http) {
@@ -91,7 +123,14 @@ class Client(private val key: String) {
                 .addParameter("convert", toCurrency)
                 .addParameter("key", key).build()
 
-            return mapper.readValue(((http.execute(request).entity.content)), Volume::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Volume::class.java)
         }
     }
 
@@ -112,7 +151,14 @@ class Client(private val key: String) {
                 .addParameter("convert", toCurrency)
                 .addParameter("key", key).build()
 
-            return mapper.readValue(((http.execute(request).entity.content)), Market::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Market::class.java)
         }
     }
 
@@ -144,7 +190,15 @@ class Client(private val key: String) {
                 .addParameter("convert", toCurrency)
                 .addParameter("key", key).build()
 
-            return mapper.readValue(((http.execute(request).entity.content)), Sparkline::class.java)
+
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Sparkline::class.java)
         }
     }
 
@@ -171,8 +225,14 @@ class Client(private val key: String) {
                 .addParameter("ids", shortCurrency.joinToString(","))
                 .addParameter("key", key).build()
 
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
 
-            return mapper.readValue(((http.execute(request).entity.content)), Meta::class.java)
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Meta::class.java)
         }
     }
 
@@ -215,7 +275,14 @@ class Client(private val key: String) {
                 .addParameter("key", key).build()
 
 
-            return mapper.readValue(((http.execute(request).entity.content)), Ticker::class.java)
+            val result = http.execute(request)
+            val statusCode = result.statusLine.statusCode
+
+            if (statusCode != 200) {
+                throw HttpResponseException(statusCode, result.entity.content.bufferedReader().readText())
+            }
+
+            return mapper.readValue(result.entity.content, Ticker::class.java)
         }
     }
 
