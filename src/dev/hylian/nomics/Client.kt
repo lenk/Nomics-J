@@ -12,22 +12,73 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class Client(private val key: String) {
     private val mapper = ObjectMapper()
 
     private val utcFormat = SimpleDateFormat("yyyy-MM-dd\'T\'hh:mm:ss\'Z\'")
     private val http: CloseableHttpClient = HttpClients.createDefault()
     private val currencies = "https://api.nomics.com/v1/currencies/"
+    private val rates = "https://api.nomics.com/v1/exchange-rates"
     private val market = "https://api.nomics.com/v1/market-cap"
+    private val markets = "https://api.nomics.com/v1/markets"
     private val volume = "https://api.nomics.com/v1/volume"
+
+    /**
+     * Exchange rates for every point from [start] to [end] time range.
+     * This endpoint can be used with other history endpoints to convert values into a desired quote [currency].
+     */
+    fun getRatesHistory(currency: String = "BTC", start: Date = Date(), end: Date ? = null): RatesHistory {
+        synchronized(http) {
+            val request = HttpGet("$rates/history")
+
+            ((request as HttpRequestBase).uri) = URIBuilder(request.uri)
+                .addParameter("end", if (end != null) utcFormat.format(end) else "")
+                .addParameter("start", utcFormat.format(start))
+                .addParameter("currency", currency)
+                .addParameter("key", key).build()
+
+
+            return mapper.readValue(http.execute(request).entity.content, RatesHistory::class.java)
+        }
+    }
+
+    /**
+     * The exchange rates endpoint returns the current exchange rates used by Nomics to convert prices from markets into USD.
+     * This contains Fiat currencies as well as a BTC and ETH quote prices.
+     * This endpoint helps normalize data across markets as well as to provide localization for users.
+     */
+    fun getRates(): Rates? {
+        synchronized(http) {
+            val request = HttpGet(rates)
+
+            ((request as HttpRequestBase).uri) = URIBuilder(request.uri)
+                .addParameter("key", key).build()
+
+
+            return mapper.readValue(http.execute(request).entity.content, Rates::class.java)
+        }
+    }
 
 
     /**
-     * Volume History is the total volume for all crypto-assets in [toCurrency] at intervals
-     * between the requested [start] and [end] time period.
-     *
-     * For each entry, the volume field represents the sum of the spot_volume and derivative_volume fields.
+     * The markets endpoint returns information on the [exchange]s and markets that Nomics supports,
+     * in addition to the Nomics currency identifiers for the [base] and [quote] currency.
      */
+    fun getMarkets(exchange: String = "", base: Array<String> = emptyArray(), quote: Array<String> = emptyArray()): Markets {
+        synchronized(http) {
+            val request = HttpGet(markets)
+
+            ((request as HttpRequestBase).uri) = URIBuilder(request.uri)
+                .addParameter("base", base.joinToString(","))
+                .addParameter("quote", quote.joinToString(","))
+                .addParameter("exchange", exchange)
+
+                .addParameter("key", key).build()
+
+            return mapper.readValue((http.execute(request).entity.content), Markets::class.java)
+        }
+    }
 
     @Throws(HttpStatusException::class, IOException::class)
     fun getVolume(start: Date, end: Date ? = null, toCurrency: String = "USD"): Volume {
