@@ -14,16 +14,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class Client(private val key: String) {
-    private val mapper = ObjectMapper()
+open class Client(private val key: String) {
 
     private val utcFormat = SimpleDateFormat("yyyy-MM-dd\'T\'hh:mm:ss\'Z\'")
     private val http: CloseableHttpClient = HttpClients.createDefault()
-    private val currencies = "https://api.nomics.com/v1/currencies/"
+    private val currencies = "https://api.nomics.com/v1/currencies"
     private val rates = "https://api.nomics.com/v1/exchange-rates"
     private val market = "https://api.nomics.com/v1/market-cap"
     private val markets = "https://api.nomics.com/v1/markets"
     private val volume = "https://api.nomics.com/v1/volume"
+    private val mapper = ObjectMapper()
 
     /**
      * Exchange rates for every point from [start] to [end] time range.
