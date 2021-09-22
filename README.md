@@ -2,7 +2,10 @@
 
 <p align="center">
 <b>Simple library for handling Nomics API</b><br>
-This library is not officially maintained and is a 3rd party library maintained for fun and usage!
+This library is not officially maintained and is a 3rd party library maintained for fun and usage!<br><br>
+  
+  <b>
+  Nomics is an API-first crypto-asset data company delivering professional-grade market data APIs to institutional crypto investors & exchanges. Nomics offer products & services that allow funds, fintech apps, & exchanges to access clean, normalized & gapless primary source trade & order book data.</b>
 </p>
 
 <p align="center">
