@@ -12,10 +12,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-fun main() {
-    println(Client("d6b74d054b95db743cd574f721cfce1653f3c210").getMarket(Date()))
-}
-
 class Client(private val key: String) {
     private val mapper = ObjectMapper()
 
