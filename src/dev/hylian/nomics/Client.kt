@@ -8,7 +8,6 @@ import org.apache.http.client.methods.HttpRequestBase
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
-import org.jsoup.HttpStatusException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,7 +29,7 @@ open class Client(private val key: String) {
      * This endpoint can be used with other history endpoints to convert values into a desired quote [currency].
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getRatesHistory(currency: String = "BTC", start: Date = Date(), end: Date ? = null): RatesHistory {
         synchronized(http) {
             val request = HttpGet("$rates/history")
@@ -59,7 +58,7 @@ open class Client(private val key: String) {
      * This endpoint helps normalize data across markets as well as to provide localization for users.
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getRates(): Rates? {
         synchronized(http) {
             val request = HttpGet(rates)
@@ -85,7 +84,7 @@ open class Client(private val key: String) {
      * in addition to the Nomics currency identifiers for the [base] and [quote] currency.
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getMarkets(exchange: String = "", base: Array<String> = emptyArray(), quote: Array<String> = emptyArray()): Markets {
         synchronized(http) {
             val request = HttpGet(markets)
@@ -112,7 +111,7 @@ open class Client(private val key: String) {
      * Volume History is the total volume for all crypto-assets in [toCurrency] at intervals between the requested [start] and [end] time period.
      * For each entry, the volume field represents the sum of the spot_volume and derivative_volume fields.
      */
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getVolume(start: Date, end: Date ? = null, toCurrency: String = "USD"): Volume {
         synchronized(http) {
             val request = HttpGet("$volume/history")
@@ -140,7 +139,7 @@ open class Client(private val key: String) {
      * the requested [start] and [end] time period.
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getMarket(start: Date, end: Date ? = null, toCurrency: String = "USD"): Market {
         synchronized(http) {
             val request = HttpGet("$market/history")
@@ -168,7 +167,7 @@ open class Client(private val key: String) {
      * from the [start] to the [end] date if provided
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getSparkline(shortCurrency: String, start: Date, end: Date ? = null, toCurrency: String = "USD"): Sparkline {
         return getSparkline(arrayOf(shortCurrency), start, end, toCurrency)
     }
@@ -178,7 +177,7 @@ open class Client(private val key: String) {
      * from the [start] to the [end] date if provided
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getSparkline(shortCurrency: Array<String>, start: Date, end: Date ? = null, toCurrency: String = "USD"): Sparkline {
         synchronized(http) {
             val request = HttpGet("$currencies/sparkline")
@@ -206,7 +205,7 @@ open class Client(private val key: String) {
      * The currencies endpoint returns all the [shortCurrency] and their metadata that Nomics supports.
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getMeta(shortCurrency: String): Meta {
         return getMeta(arrayOf(shortCurrency))
     }
@@ -215,7 +214,7 @@ open class Client(private val key: String) {
      * The currencies endpoint returns all the [shortCurrency] and their metadata that Nomics supports.
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getMeta(shortCurrency: Array<String>): Meta {
 
         synchronized(http) {
@@ -243,7 +242,7 @@ open class Client(private val key: String) {
      * Current prices are updated every 10 seconds
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getTicker(shortCurrency: String, toCurrency: String = "USD", intervals: Array<Interval> = arrayOf(Interval.YTD),
                   sort: Sort = Sort.RANK, perPage: Int = 100, page: Int = 1, status: Status = Status.active): Ticker {
 
@@ -257,7 +256,7 @@ open class Client(private val key: String) {
      * Current prices are updated every 10 seconds
      */
 
-    @Throws(HttpStatusException::class, IOException::class)
+    @Throws(HttpResponseException::class, IOException::class)
     fun getTicker(shortCurrency: Array<String>, toCurrency: String = "USD", intervals: Array<Interval> = arrayOf(Interval.YTD),
                   sort: Sort = Sort.RANK, perPage: Int = 100, page: Int = 1, status: Status = Status.active): Ticker {
 
